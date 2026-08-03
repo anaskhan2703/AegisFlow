@@ -1,7 +1,7 @@
 import enum
 import uuid
 
-from sqlalchemy import Column, DateTime, Enum, String
+from sqlalchemy import ARRAY, Column, DateTime, Enum, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.sql import func
 
@@ -36,3 +36,7 @@ class Alert(Base):
     mitre_technique = Column(String, nullable=True)
     status = Column(Enum(AlertStatus, name="alert_status"), nullable=False, default=AlertStatus.open)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    raw_payload = Column(JSONB, nullable=False, default=dict)
+    extracted_indicators = Column(ARRAY(String), nullable=False, default=list)
+    correlation_score = Column(Integer, nullable=False, default=0)  # 0-100
