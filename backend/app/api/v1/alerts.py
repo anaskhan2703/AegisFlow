@@ -17,6 +17,7 @@ from app.schemas.alert import (
 )
 from app.services.alert_correlation.correlator import correlate_alert
 from app.services.alert_correlation.demo_generator import generate_demo_alerts
+from app.services.playbook_engine import run_playbooks_for_alert
 
 router = APIRouter(prefix="/api/v1/alerts", tags=["alerts"])
 
@@ -40,6 +41,15 @@ async def _ingest_one(db: Session, payload: dict) -> Alert:
     db.add(alert)
     db.commit()
     db.refresh(alert)
+
+    # Automatic playbook evaluation runs against every newly-ingested alert.
+    # A playbook bug must never break ingestion, so this is committed
+    # separately from the alert insert above and any exception here would
+    # already have been swallowed inside run_playbooks_for_alert itself.
+    run_playbooks_for_alert(db, alert, trigger_source="automatic")
+    db.commit()
+    db.refresh(alert)
+
     alert._indicator_details = correlation["indicator_details"]
     return alert
 
@@ -168,4 +178,12 @@ def update_alert_status(
     db.add(alert)
     db.commit()
     db.refresh(alert)
+
+    # Re-evaluate automatic playbooks now that status has changed — e.g. a
+    # playbook keyed on status == "investigating" should still be able to
+    # fire from a manual status update, not just at ingest time.
+    run_playbooks_for_alert(db, alert, trigger_source="automatic")
+    db.commit()
+    db.refresh(alert)
+
     return alert
