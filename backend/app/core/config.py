@@ -22,11 +22,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # AI provider — "ollama" or "gemini"
-    AI_PROVIDER: str = "ollama"
-    OLLAMA_HOST: str = "http://localhost:11434"
-    OLLAMA_MODEL: str = "llama3.1"
+    # AI triage provider (Gemini free tier). Leave GEMINI_API_KEY blank to
+    # use the rule-based simulator instead — see app/services/ai_triage.
     GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-3.6-flash"
 
     # Threat intel APIs (free tiers) — leave blank to use the simulator
     VIRUSTOTAL_API_KEY: str = ""
