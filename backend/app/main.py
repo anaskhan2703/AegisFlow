@@ -7,6 +7,7 @@ from app.api.v1 import threat_intel
 from app.api.v1 import alerts
 from app.api.v1 import ai_reports
 from app.api.v1 import playbooks
+from app.api.v1 import incidents
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -30,6 +31,7 @@ app.include_router(threat_intel.router)
 app.include_router(alerts.router)
 app.include_router(ai_reports.router)
 app.include_router(playbooks.router)
+app.include_router(incidents.router)
 
 @app.get("/health", tags=["system"])
 async def health_check():
